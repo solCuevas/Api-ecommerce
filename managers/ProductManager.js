@@ -1,60 +1,55 @@
 import fs from 'fs/promises';
-import path from 'path';
-
-const filePath = path.resolve('data/products.json');
 
 export default class ProductManager {
-  constructor() {
-    this.path = filePath;
+  constructor(path = './products.json') {
+    this.path = path;
+    this.products = [];
   }
 
-  async #readFile() {
+  async load() {
     try {
       const data = await fs.readFile(this.path, 'utf-8');
-      return JSON.parse(data || '[]');
+      this.products = JSON.parse(data);
     } catch {
-      return [];
+      this.products = [];
+      await this.save();
     }
   }
 
-  async #writeFile(data) {
-    await fs.writeFile(this.path, JSON.stringify(data, null, 2));
+  async save() {
+    await fs.writeFile(this.path, JSON.stringify(this.products, null, 2));
   }
 
   async getAll() {
-    return await this.#readFile();
+    await this.load();
+    return this.products;
   }
 
   async getById(id) {
-    const products = await this.#readFile();
-    return products.find(p => p.id == id);
+    await this.load();
+    return this.products.find(p => p.id === id);
   }
 
-  async addProduct(productData) {
-    const products = await this.#readFile();
-    const newProduct = {
-      id: products.length ? products[products.length - 1].id + 1 : 1,
-      status: true,
-      ...productData
-    };
-    products.push(newProduct);
-    await this.#writeFile(products);
-    return newProduct;
+  async addProduct(product) {
+    await this.load();
+    const newId = this.products.length > 0 ? this.products[this.products.length - 1].id + 1 : 1;
+    product.id = newId;
+    this.products.push(product);
+    await this.save();
   }
 
-  async updateProduct(id, updateData) {
-    const products = await this.#readFile();
-    const index = products.findIndex(p => p.id == id);
-    if (index === -1) return null;
-    const updatedProduct = { ...products[index], ...updateData, id: products[index].id };
-    products[index] = updatedProduct;
-    await this.#writeFile(products);
-    return updatedProduct;
+  async updateProduct(id, data) {
+    await this.load();
+    const index = this.products.findIndex(p => p.id === id);
+    if (index === -1) return false;
+    this.products[index] = { ...this.products[index], ...data, id: this.products[index].id };
+    await this.save();
+    return true;
   }
 
   async deleteProduct(id) {
-    const products = await this.#readFile();
-    const filtered = products.filter(p => p.id != id);
-    await this.#writeFile(filtered);
+    await this.load();
+    this.products = this.products.filter(p => p.id !== id);
+    await this.save();
   }
 }

@@ -1,0 +1,22 @@
+[
+  {
+    "id": 2,
+    "title": "Pantalón negro",
+    "description": "Pantalón formal negro, talla M",
+    "code": "PAN-002",
+    "price": 499,
+    "status": true,
+    "stock": 15,
+    "category": "Ropa"
+  },
+  {
+    "title": "pantalon",
+    "description": "negra",
+    "code": "001",
+    "price": 334,
+    "stock": 5,
+    "category": "ropa",
+    "thumbnails": [],
+    "id": 3
+  }
+]
